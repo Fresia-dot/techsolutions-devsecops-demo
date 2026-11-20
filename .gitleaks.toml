@@ -1,0 +1,11 @@
+# Configuración de Gitleaks de TechSolutions: reglas por defecto + regla propia de la empresa
+title = "TechSolutions"
+
+[extend]
+useDefault = true
+
+[[rules]]
+id = "techsolutions-api-key"
+description = "Token interno de TechSolutions (formato ts_live_...)"
+regex = '''ts_live_[a-z0-9]{32}'''
+keywords = ["ts_live_"]

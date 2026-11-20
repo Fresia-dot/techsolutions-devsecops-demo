@@ -1,0 +1,8 @@
+proveedor,servicio,acceso_datos_clientes,impacto_si_falla,acceso_sistemas_o_codigo,certificaciones,accesos_mfa,cifrado,continuidad,incidentes,desarrollo_seguro,subcontratistas,datos_personales,acuerdo_seguridad_firmado,fecha_evaluacion,responsable
+Amazon Web Services,Infraestructura nube (IaaS),si,alto,si,15,15,10,15,15,10,10,10,si,2026-11-18,Responsable de nube
+GitHub,Repositorio de código y CI/CD,si,alto,si,15,15,10,12,15,10,8,10,si,2026-11-18,Líder DevSecOps
+Google Workspace,Correo y documentos,si,alto,no,15,15,10,15,12,8,8,10,si,2026-11-19,Responsable de seguridad
+DevPartners SAC,Desarrollo tercerizado,si,medio,si,0,8,5,5,5,5,5,5,no,2026-11-19,Responsable de seguridad
+PlanillaFácil,Software de planillas (SaaS),si,medio,no,5,10,10,10,5,5,5,8,si,2026-11-20,Jefe de RR. HH.
+SoporteTI Express,Soporte técnico en sitio,no,medio,si,,,,,,,,,no,,Responsable de seguridad
+Limpieza Total,Limpieza de oficinas,no,bajo,no,,,,,,,,,no,,Administración

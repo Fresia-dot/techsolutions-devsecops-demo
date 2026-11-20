@@ -1,0 +1,18 @@
+# Laboratorio de phishing SIMULADO (control 6.3 / riesgo R4.4). Todo queda en tu PC:
+# - Mailpit recibe TODOS los correos (no sale nada a internet) -> http://localhost:8025
+# - GoPhish administra la campaña -> https://localhost:3333  (usuario admin; la clave inicial sale en los logs)
+# - Página de aterrizaje del phishing simulado -> http://localhost:8080
+# Uso: docker compose up -d   |   ver clave: docker compose logs gophish | grep -i password
+services:
+  mailpit:
+    image: axllent/mailpit:latest
+    ports:
+      - "127.0.0.1:8025:8025"   # bandeja web
+      - "127.0.0.1:1025:1025"   # SMTP
+  gophish:
+    image: gophish/gophish:latest
+    ports:
+      - "127.0.0.1:3333:3333"   # consola de administración
+      - "127.0.0.1:8080:80"     # servidor de phishing (landing page)
+    depends_on:
+      - mailpit

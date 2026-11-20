@@ -1,0 +1,112 @@
+# Puerta de seguridad de TechSolutions (controles 8.25, 8.28, 5.21 y 5.23)
+# Bloquea el merge y la liberación si hay secretos, código inseguro o dependencias vulnerables.
+name: security-gate
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+    tags: ['v*']
+
+permissions:
+  contents: read
+
+jobs:
+  secretos:
+    name: Detección de secretos (Gitleaks)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0          # revisa todo el historial, no solo el último commit
+      - name: Instalar Gitleaks
+        run: |
+          curl -sSL https://github.com/gitleaks/gitleaks/releases/download/v8.21.2/gitleaks_8.21.2_linux_x64.tar.gz | tar xz gitleaks
+      - name: Escanear todo el historial (falla si hay secretos)
+        run: ./gitleaks detect --source . --config .gitleaks.toml --redact -v --report-format sarif --report-path gitleaks.sarif
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: gitleaks-report
+          path: gitleaks.sarif
+
+  sast:
+    name: Análisis estático (Semgrep)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install semgrep
+      - run: semgrep scan --config .semgrep/ --config p/python --error --metrics=off
+
+  dependencias:
+    name: Análisis de dependencias y SBOM (pip-audit)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install pip-audit
+      - name: Generar SBOM (CycloneDX)
+        run: pip-audit -r requirements.txt --disable-pip --no-deps -f cyclonedx-json -o sbom.json || true
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sbom
+          path: sbom.json
+      - name: Fallar si hay vulnerabilidades conocidas
+        run: pip-audit -r requirements.txt --disable-pip --no-deps --desc
+
+  iac:
+    name: Configuración segura de nube (Checkov)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install checkov
+      - name: Escanear la infraestructura como código (falla si hay malas configuraciones)
+        run: checkov -d infra --framework terraform --compact --skip-download
+
+  dast:
+    name: Pruebas dinámicas (OWASP ZAP baseline)
+    needs: [sast, dependencias]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt
+      - name: Levantar la app en segundo plano
+        run: |
+          python -c "import app; app.init_db()"
+          nohup python -m flask --app app run --host 127.0.0.1 --port 5000 > flask.log 2>&1 &
+          sleep 5 && curl -sf http://127.0.0.1:5000/
+      - name: Escaneo ZAP baseline
+        run: |
+          mkdir -p zap && chmod 777 zap
+          docker run --network host -v "$PWD/zap:/zap/wrk" ghcr.io/zaproxy/zaproxy:stable \
+            zap-baseline.py -t http://127.0.0.1:5000 -r zap-report.html -I
+      - uses: actions/upload-artifact@v4
+        with:
+          name: zap-report
+          path: zap/zap-report.html
+
+  liberacion:
+    name: Liberar versión (solo si todo pasa)
+    needs: [secretos, sast, dependencias, iac, dast]
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    environment: production     # requiere aprobación del responsable de seguridad
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - run: gh release create "$GITHUB_REF_NAME" --generate-notes
+        env:
+          GH_TOKEN: ${{ github.token }}

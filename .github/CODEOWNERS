@@ -1,0 +1,4 @@
+# Cambios en la puerta de seguridad y en las reglas requieren aprobación del responsable de seguridad
+# Reemplaza @TU-USUARIO por tu usuario de GitHub (o el de tu compañero que haga de security champion)
+/.github/   @TU-USUARIO
+/.semgrep/  @TU-USUARIO

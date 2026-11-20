@@ -1,0 +1,17 @@
+rules:
+  - id: sql-concatenado
+    languages: [python]
+    severity: ERROR
+    message: >-
+      Consulta SQL construida con f-string o concatenación (riesgo de inyección SQL).
+      Usa consultas parametrizadas. Guía de codificación segura, regla 3.
+    pattern-either:
+      - pattern: $CON.execute(f"...", ...)
+      - pattern: $CON.execute(f"...")
+      - pattern: $CON.execute("..." + $X, ...)
+      - pattern: $CON.execute("..." + $X)
+  - id: flask-debug-activo
+    languages: [python]
+    severity: ERROR
+    message: Flask en modo debug expone un depurador remoto. Guía de codificación segura, regla 8.
+    pattern: $APP.run(..., debug=True, ...)

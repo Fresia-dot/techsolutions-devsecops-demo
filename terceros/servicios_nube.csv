@@ -1,0 +1,7 @@
+servicio,proveedor,uso,responsable,mfa_cuenta_admin,almacenamiento_publico,cifrado_activo,registros_auditoria,fecha_ultima_revision
+AWS - Cuenta producción,Amazon Web Services,Aplicaciones SaaS de clientes,Responsable de nube,si,no,si,si,2026-11-18
+AWS - Cuenta pruebas,Amazon Web Services,Entornos de prueba,Responsable de nube,si,no,si,si,2026-11-18
+GitHub Organization,GitHub,Código fuente y pipelines,Líder DevSecOps,si,no,si,si,2026-11-18
+Google Workspace,Google,Correo y documentos,Responsable de seguridad,si,no,si,si,2026-11-19
+PlanillaFácil,PlanillaFácil,Planillas de RR. HH.,Jefe de RR. HH.,no,no,si,no,2026-11-20
+Trello (equipo diseño),Atlassian,Tablero de tareas (detectado como shadow IT),,no,si,si,no,
