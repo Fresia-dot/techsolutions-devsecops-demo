@@ -25,7 +25,7 @@ jobs:
           curl -sSL https://github.com/gitleaks/gitleaks/releases/download/v8.21.2/gitleaks_8.21.2_linux_x64.tar.gz | tar xz gitleaks
       - name: Escanear todo el historial (falla si hay secretos)
         run: ./gitleaks detect --source . --config .gitleaks.toml --redact -v --report-format sarif --report-path gitleaks.sarif
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: gitleaks-report
@@ -53,7 +53,7 @@ jobs:
       - run: pip install pip-audit
       - name: Generar SBOM (CycloneDX)
         run: pip-audit -r requirements.txt --disable-pip --no-deps -f cyclonedx-json -o sbom.json || true
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: sbom
           path: sbom.json
@@ -92,7 +92,7 @@ jobs:
           mkdir -p zap && chmod 777 zap
           docker run --network host -v "$PWD/zap:/zap/wrk" ghcr.io/zaproxy/zaproxy:stable \
             zap-baseline.py -t http://127.0.0.1:5000 -r zap-report.html -I
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: zap-report
           path: zap/zap-report.html
