@@ -1,4 +1,4 @@
 # VULNERABLE a propósito (Demo 3): versiones con CVE conocidas
 flask==2.2.2
-werkzeug==2.2.2
+werkzeug==3.1.9
 jinja2==3.1.2
