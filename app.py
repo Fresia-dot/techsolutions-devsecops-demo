@@ -1,14 +1,13 @@
-"""Aplicación de demostración (versión VULNERABLE a propósito).
-
-Úsala solo en tu repositorio de práctica. Las demos la corrigen paso a paso.
-"""
+"""Versión CORREGIDA de app.py (cópiala sobre app.py en la Demo 2)."""
 import os
 import sqlite3
 
-from flask import Flask, jsonify, request
+from flask import Flask, abort, jsonify, request
 
 app = Flask(__name__)
 DB = os.environ.get("DB_PATH", "demo.db")
+# El secreto se lee del entorno (GitHub Secrets o gestor de secretos), nunca del código
+API_KEY = os.environ.get("API_KEY")
 
 
 def init_db():
@@ -27,14 +26,15 @@ def index():
 @app.route("/cliente")
 def cliente():
     cid = request.args.get("id", "1")
+    if not cid.isdigit():  # validación de entrada con lista permitida
+        abort(400)
     con = sqlite3.connect(DB)
-    # VULNERABLE (Demo 2): consulta construida concatenando la entrada del usuario
-    fila = con.execute(f"SELECT id, nombre FROM clientes WHERE id = {cid}").fetchone()
+    # SEGURO: consulta parametrizada
+    fila = con.execute("SELECT id, nombre FROM clientes WHERE id = ?", (int(cid),)).fetchone()
     con.close()
     return jsonify(fila)
 
 
 if __name__ == "__main__":
     init_db()
-    # VULNERABLE (Demo 2): modo debug activo y escuchando en todas las interfaces
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    app.run(host="127.0.0.1", port=5000, debug=False)
